@@ -92,15 +92,39 @@ struct PixelFormat {
 
 	inline void colorToRGB(uint32 color, uint8 &r, uint8 &g, uint8 &b) const {
 		r = ((color >> rShift) << rLoss) & 0xFF;
+		uint8 rFill = r >> rBits();
+		rFill |= rFill >> rBits();
+		rFill |= rFill >> (rBits() << 1);
+		rFill |= rFill >> (rBits() << 2);
+		r |= rFill;
+
 		g = ((color >> gShift) << gLoss) & 0xFF;
+		uint8 gFill = g >> gBits();
+		gFill |= gFill >> gBits();
+		gFill |= gFill >> (gBits() << 1);
+		gFill |= gFill >> (gBits() << 2);
+		g |= gFill;
+
 		b = ((color >> bShift) << bLoss) & 0xFF;
+		uint8 bFill = b >> bBits();
+		bFill |= bFill >> bBits();
+		bFill |= bFill >> (bBits() << 1);
+		bFill |= bFill >> (bBits() << 2);
+		b |= bFill;
 	}
 
 	inline void colorToARGB(uint32 color, uint8 &a, uint8 &r, uint8 &g, uint8 &b) const {
-		a = (aBits() == 0) ? 0xFF : (((color >> aShift) << aLoss) & 0xFF);
-		r = ((color >> rShift) << rLoss) & 0xFF;
-		g = ((color >> gShift) << gLoss) & 0xFF;
-		b = ((color >> bShift) << bLoss) & 0xFF;
+		if (aBits() == 0) {
+			a = 0xFF;
+		} else {
+			a = ((color >> aShift) << aLoss) & 0xFF;
+			uint8 aFill = a >> aBits();
+			aFill |= aFill >> aBits();
+			aFill |= aFill >> (aBits() << 1);
+			aFill |= aFill >> (aBits() << 2);
+			a |= aFill;
+		}
+		colorToRGB(color, r, g, b);
 	}
 
 	//////////////////////////////////////////////////////////////////////
